@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <title>64k should be enough for anybody</title>
+    <script type="text/javascript" src="crafty.js"></script>
+    <script type="text/javascript" src="browserify.js"></script>
+    <script type="text/javascript">
+      window.onload = function() {
+        require('./client.js').start('$SESSION_TOKEN');
+      }
+    </script>
+    <link type="text/css" href="style.css" rel="stylesheet" /> 
+  </head>
+  <body>
+    <noscript>
+      <div class="alert">
+        This game won't work without JavaScript.
+      </div>
+    </noscript>
+  </body>
+</html>
