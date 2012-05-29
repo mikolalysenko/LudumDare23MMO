@@ -35,6 +35,7 @@ function MOB(id, gs, attribs) {
     }
     mob.attribs.target_path =  data.path;
     if(data.path.length > 0) {
+      mob.attribs.target_path.unshift();
       mob.attribs.target_action = data.action;
     } else {
       mob.attribs.target_action    = {};
@@ -43,6 +44,7 @@ function MOB(id, gs, attribs) {
   
   this.emitter.on("WalkTo", function(data) {
     if(mob.dead()) {
+      console.log("Aborting walk: dead");
       return;
     }
   
@@ -88,8 +90,21 @@ function MOB(id, gs, attribs) {
       mob.attribs.x = nx;
       mob.attribs.y = ny;
       
-      for(var dx=-1; dx<1; ++dx)
-      for(var dy=-1; dy<1; ++dy) {
+      
+      if(mob.attribs.target_path.length === 0) {
+        mob.emitter.emit("WalkCompleted", {
+          target: mob.attribs.target_position, 
+          action: mob.attribs.target_action, 
+          direction: direction
+        });
+        mob.target_action = {};
+      }      
+      mob.emitter.emit("WalkStep", { direction: direction });
+    }
+    
+    
+    for(var dx=-1; dx<=1; ++dx)
+      for(var dy=-1; dy<=1; ++dy) {
         if(Math.abs(dx) + Math.abs(dy) <= 1) {
           var mob_list = gs.query_mobs(mob.attribs.x+dx*16, mob.attribs.y+dy*16);
           for(var k=0; k<mob_list.length; ++k) {
@@ -103,16 +118,7 @@ function MOB(id, gs, attribs) {
           }
         }
       }
-      if(mob.attribs.target_path.length === 0) {
-        mob.emitter.emit("WalkCompleted", {
-          target: mob.attribs.target_position, 
-          action: mob.attribs.target_action, 
-          direction: direction
-        });
-        mob.target_action = {};
-      }      
-      mob.emitter.emit("WalkStep", { direction: direction });
-    }
+    
   });
 }
 
@@ -338,6 +344,7 @@ function GameServer(options) {
       var msg = JSON.parse(data);
       
       if(msg.type === "WalkTo") {
+        mob.emitter.emit("StopCommand");
         if(checkCoord(msg.x, msg.y)  && !mob.dead()) {
           mob.emitter.emit("WalkTo", {
             x: msg.x, 
@@ -347,6 +354,7 @@ function GameServer(options) {
         }
       } else if(msg.type === "Attack" && msg.target_id in gs.mobs) {
         console.log("Executing attack input");
+        mob.emitter.emit("StopCommand");
         mob.emitter.emit("Attack", {target_id: msg.target_id});
       } else if(msg.type === "Chat" && 
           typeof(msg.value) === "string") {
@@ -370,6 +378,7 @@ function GameServer(options) {
         delete gs.clients[client.id];
         client.account.logout();
         gs.destroyMOB(mob);
+        ws.close();
       }
     };
     

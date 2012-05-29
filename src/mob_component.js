@@ -25,10 +25,6 @@ exports.createMOBComponents = function(level) {
         if(path.length > 0) {        
           for(var i=0; i<speed; ++i) {
             var targ = path[0], ntile = level.get(targ[0], targ[1]);
-            if(ntile.collide) {
-              this.abortWalk("collide");
-              return;
-            }
             
             //Compute walking direction
             
@@ -93,10 +89,23 @@ exports.createMOBComponents = function(level) {
             
         var sx = Math.floor(this.x / 16),
             sy = Math.floor(this.y / 16);
-        if(npath.length > 0 && (Math.abs(npath[0][0]-sx) + Math.abs(npath[0][1] - sy)) > 1) {
-          var tpath = level.boundedBFS([sx, sy], [npath[0][0], npath[0][1]], 100);
-          tpath.pop();
-          npath = tpath.concat(npath);
+        
+        if(npath.length > 0 && (npath[0][0] !== sx) && (npath[0][1]!=sy) ) {
+          var best_path = npath, best_score = 1000;
+          for(var i=0; i<npath.length; ++i) {
+            var tpath = level.boundedBFS([sx, sy], npath[i], 100);
+            var score = tpath.length;
+            
+            if(tpath.length === 0) {
+              continue;
+            }
+            
+            if(score <= best_score) {
+              best_score = score;
+              best_path = tpath.concat(npath.slice(i+1));
+            }
+          }
+          npath = best_path;
         }
             
         //Stop walking if already walking
@@ -258,6 +267,8 @@ exports.createMOBComponents = function(level) {
       
       
       this.bind("Killed", function(args) {
+        this.stop();
+        this.animate("stand_down", 1000, -1); 
         this.attr({alpha:0});
         Crafty.e(this.corpse_type)
             .attr({x:this.x, y:this.y});
@@ -319,7 +330,7 @@ exports.createMOBComponents = function(level) {
       
       var player = this;
       level.emitter.on('click', function(data) {
-        if(data.tile && !data.tile.collide) {
+        if(data.tile) {
           connection.send({ 
             type: "WalkTo", 
             x: data.x*16, 

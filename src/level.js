@@ -124,10 +124,6 @@ Level.prototype.boundedBFS = function(start, goal, bound) {
       
       //Change order of local search to avoid walking in boxy lines
       var tx = dx, ty = dy;
-      if((cur[1]^cur[2])&1) {
-        tx = -dx;
-        ty = -dy;
-      }
       var n = [cur[1] + tx, cur[2] + ty, cur[3]];
       
       //Check if already visited
@@ -158,8 +154,10 @@ Level.prototype.boundedBFS = function(start, goal, bound) {
       
       //Add to index, continue
       if(cur[4] < bound) {
+        var a = (n[0]-goal[0]), b = (n[1]-goal[1]);
+      
         to_visit.push([
-          Math.abs(n[0]-goal[0]) + Math.abs(n[1]-goal[1])
+          Math.sqrt(a*a + b*b) + cur[4]
           , n[0]
           , n[1]
           , idx

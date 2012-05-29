@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #Install libraries from apt
-sudo apt-get install openssl libssl-dev binutils g++ gcc
+sudo apt-get install curl bison openssl libssl-dev binutils g++ gcc
 
 #Check if node exists
 node=`which node 2>&1`
@@ -35,7 +35,7 @@ ret=$?
 
 #Install npm packages
 echo "Installing NPM packages"
-npm install ws mongodb optimist browserify openid uglify-js patcher
+npm install connect ws mongodb optimist browserify openid uglify-js
 
 #Download and unzip mongodb locally
 mongo=`which mongo/mongo 2>&1`
@@ -63,4 +63,9 @@ logappend = true
 auth      = false' > config.txt
   cd ..
 fi
+
+#Set up local database
+echo "Reinitializing local database"
+rm -rf data/db data/*.log
+mkdir -p data/db
 

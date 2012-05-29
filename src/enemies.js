@@ -43,8 +43,9 @@ exports.makeMOBSpawner = function(gs, params) {
         var dist = Math.abs(base_pos[0] - mob.attribs.x) + Math.abs(base_pos[1] - mob.attribs.y),
             tdist = Math.abs(target_mob.attribs.x - mob.attribs.x) + Math.abs(target_mob.attribs.y - mob.attribs.y);
         if(dist >= retreat_distance || target_mob.dead()) {
-          console.log("Retreating!", target_mob.dead, dist);
+          console.log("Retreating!", target_mob.dead(), dist);
           state = "Waiting";
+          mob.emitter.emit("StopAttack");
           var target = locateSpawnPosition();
           mob.emitter.emit("WalkTo", {
             x: target[0],
@@ -63,10 +64,6 @@ exports.makeMOBSpawner = function(gs, params) {
           //Attack player!
           target_mob = args.source;
           state = "Angry";
-          mob.emitter.emit("Attack", { target_id: target_mob.id });
-        }
-      } else if(state === "Angry") {
-        if(args.source.id === null) {
           mob.emitter.emit("Attack", { target_id: target_mob.id });
         }
       }    

@@ -31,7 +31,7 @@ exports.initializeWorld = function(gs) {
             level: [1, 3, 5, 7, 9, 100][power],
             xp: 0,
             attack_speed: [1500, 1400, 1300, 1200, 1100, 500][power],
-            attack_power: [1, 6, 15, 30, 90][power],
+            attack_power: [1, 6, 15, 30, 90, 200][power],
             defense_power: [0, 1, 5, 20, 40, 100][power],
             components: "Rat",  
           }
@@ -65,6 +65,7 @@ exports.handleRespawn = function(mob) {
   mob.attribs.x = spoint[0];
   mob.attribs.y = spoint[1];
   mob.attribs.hp = mob.attribs.max_hp;
+  mob.attribs.target_path = [];
   mob.broadcastEvent("Respawn", mob.attribs);  
 }
 
